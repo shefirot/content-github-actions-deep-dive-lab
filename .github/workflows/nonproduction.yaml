@@ -1,11 +1,15 @@
 on:
   push:
     branches:
-      - feature-initial-page
+      - feature-*
 jobs:
   static-content-s3:
     runs-on: ubuntu-latest
+    env:
+      BUCKET_NAME: cfst-3457-c66f786ea4c668d7e846e6b5e-nonprodbucket-1o96vyl4ms9lr
     steps:
+      - name: Check out code
+        uses: actions/checkout@v2
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -16,12 +20,22 @@ jobs:
 #          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
 #          role-duration-seconds: 1200
 #          role-session-name: MySessionName
-      - uses: actions/checkout@master
-      - name: Build Gatsby Site
-        uses: jzweifel/gatsby-cli-github-action@master
+#      - uses: actions/checkout@master
+#      - name: Build Gatsby Site
+#        uses: jzweifel/gatsby-cli-github-action@master
+#        with:
+#          gatsby-arg: build
+#      - name: Deploy
+#        uses: jonelantha/gatsby-s3-action@v1
+#        with:
+#          dest-s3-bucket: cfst-3457-c66f786ea4c668d7e846e6b5e-nonprodbucket-1o96vyl4ms9lr
+      - name: set up node.js
+        uses: actions/setup-node@v2
         with:
-          gatsby-arg: build
-      - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v1
-        with:
-          dest-s3-bucket: cfst-3457-c66f786ea4c668d7e846e6b5e-nonprodbucket-1o96vyl4ms9lr
+          node-version: 14
+      - name: build site
+        run: |
+          npm ci
+          npm run build
+      - name: deploy files to bucket
+        run: aws s3 cp public s3://${{ env.BUCKET_NAME }} --recursive --acl public-read
