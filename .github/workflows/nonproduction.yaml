@@ -3,7 +3,7 @@ on:
     branches:
       - feature-initial-page
 jobs:
-  test_schedule:
+  static-content-s3:
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
@@ -18,7 +18,7 @@ jobs:
 #          role-session-name: MySessionName
       - uses: actions/checkout@master
       - name: Build Gatsby Site
-        uses: zweifel/gatsby-cli-github-action@v1.0.0
+        uses: jzweifel/gatsby-cli-github-action@master
         with:
           gatsby-arg: build
       - name: Deploy
